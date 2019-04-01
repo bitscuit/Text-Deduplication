@@ -56,6 +56,6 @@ def split(left, right, labels, size):
 
     return x_train, x_test, y_train, y_test
 
-# data = tokenizeData('../data/questions.csv')
+data = tokenizeData('../data/questions.csv')
 # print(data)
 # x_train, x_test, y_train, y_test = split(data['question1'], data['question2'], data['label'], 0.7)
