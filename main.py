@@ -19,6 +19,8 @@ from keras.layers import Input, Flatten, Dense, Dropout, Lambda
 from keras.optimizers import RMSprop
 from keras import backend as K
 
+from util import split, tokenizeData
+
 num_classes = 10
 epochs = 20
 
@@ -76,6 +78,15 @@ def create_base_network(input_shape):
     x = Dense(128, activation='relu')(x)
     x = Dropout(0.1)(x)
     x = Dense(128, activation='relu')(x)
+
+    x = Embedding(1000, 64, input_length=10)
+    # model.add(Embedding(1000, 64, input_length=10))
+
+    # the model will take as input an integer matrix of size (batch, input_length).
+    # the largest integer (i.e. word index) in the input should be
+    # no larger than 999 (vocabulary size).
+    # now model.output_shape == (None, 10, 64), where None is the batch dimension.
+
     return Model(input, x)
 
 
@@ -95,11 +106,15 @@ def accuracy(y_true, y_pred):
 # TODO: For the train and test values, call the `split` method from util.py
 
 # the data, split between train and test sets
-(x_train, y_train), (x_test, y_test) = mnist.load_data()
-x_train = x_train.astype('float32')
-x_test = x_test.astype('float32')
-x_train /= 255
-x_test /= 255
+# (x_train, y_train), (x_test, y_test) = mnist.load_data()
+# x_train = x_train.astype('float32')
+# x_test = x_test.astype('float32')
+# x_train /= 255
+# x_test /= 255
+
+data = tokenizeData('./data/questions.csv')
+x_train, x_test, y_train, y_test = split(data['question1'], data['question2'], data['label'], 0.7)
+
 input_shape = x_train.shape[1:]
 
 # create training+test positive and negative pairs

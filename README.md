@@ -22,3 +22,6 @@ There are artificial neural network models used to solve this problem. All of th
 2. use shared model to create network each for left and right input
 3. pass the two models to distance measure
 4. create new model with left and right inputs, and the distance as output
+
+# Steps to run
+1. Install keras using `pip install keras`
