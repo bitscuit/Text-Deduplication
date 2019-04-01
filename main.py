@@ -15,11 +15,15 @@ import numpy as np
 import random
 from keras.datasets import mnist
 from keras.models import Model
-from keras.layers import Input, Flatten, Dense, Dropout, Lambda
+from keras.layers import Input, Flatten, Dense, Dropout, Lambda, Embedding
 from keras.optimizers import RMSprop
 from keras import backend as K
 
-from util import split, tokenizeData
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+from rnn.util import split, tokenizeData
 
 num_classes = 10
 epochs = 20
@@ -70,16 +74,16 @@ def create_base_network(input_shape):
     '''
     input = Input(shape=input_shape)
     # Flattens the output shape 
-    x = Flatten()(input)
+    # x = Flatten()(input)
     # Output arrays of size 128
-    x = Dense(128, activation='relu')(x)
+    x = Dense(128, activation='relu')(input)
     # Sets a fraction of input units to 0 in order to stop overfitting
     x = Dropout(0.1)(x)
     x = Dense(128, activation='relu')(x)
     x = Dropout(0.1)(x)
     x = Dense(128, activation='relu')(x)
 
-    x = Embedding(1000, 64, input_length=10)
+    # x = Embedding(1000, 64, input_length=10)
     # model.add(Embedding(1000, 64, input_length=10))
 
     # the model will take as input an integer matrix of size (batch, input_length).
@@ -115,14 +119,7 @@ def accuracy(y_true, y_pred):
 data = tokenizeData('./data/questions.csv')
 x_train, x_test, y_train, y_test = split(data['question1'], data['question2'], data['label'], 0.7)
 
-input_shape = x_train.shape[1:]
-
-# create training+test positive and negative pairs
-digit_indices = [np.where(y_train == i)[0] for i in range(num_classes)]
-tr_pairs, tr_y = create_pairs(x_train, digit_indices)
-
-digit_indices = [np.where(y_test == i)[0] for i in range(num_classes)]
-te_pairs, te_y = create_pairs(x_test, digit_indices)
+input_shape = x_train['right'].shape[1:]
 
 # network definition
 base_network = create_base_network(input_shape)
@@ -144,16 +141,38 @@ model = Model([input_a, input_b], distance)
 # train
 rms = RMSprop()
 model.compile(loss=contrastive_loss, optimizer=rms, metrics=[accuracy])
-model.fit([tr_pairs[:, 0], tr_pairs[:, 1]], tr_y,
+ff = model.fit([x_train['left'], x_train['left']], y_train,
           batch_size=128,
           epochs=epochs,
-          validation_data=([te_pairs[:, 0], te_pairs[:, 1]], te_y))
+          validation_split=0.30)
+        #   validation_data=([x_test['left'], x_test['right']], y_test))
+
+# Plot accuracy
+plt.subplot(211)
+plt.plot(ff.history['accuracy'])
+plt.plot(ff.history['val_accuracy'])
+plt.title('Model Accuracy')
+plt.ylabel('Accuracy')
+plt.xlabel('Epoch')
+plt.legend(['Train', 'Validation'], loc='upper left')
+
+# Plot loss
+plt.subplot(212)
+plt.plot(ff.history['loss'])
+plt.plot(ff.history['val_loss'])
+plt.title('Model Loss')
+plt.ylabel('Loss')
+plt.xlabel('Epoch')
+plt.legend(['Train', 'Validation'], loc='upper right')
+
+plt.tight_layout(h_pad=1.0)
+plt.savefig('./data/history-graph.png')
 
 # compute final accuracy on training and test sets
-y_pred = model.predict([tr_pairs[:, 0], tr_pairs[:, 1]])
-tr_acc = compute_accuracy(tr_y, y_pred)
-y_pred = model.predict([te_pairs[:, 0], te_pairs[:, 1]])
-te_acc = compute_accuracy(te_y, y_pred)
+# y_pred = model.predict([x_train['left'], x_train['left']])
+# tr_acc = compute_accuracy(y_train, y_pred)
+# y_pred = model.predict([x_test['left'], x_test['right']])
+# te_acc = compute_accuracy(y_test, y_pred)
 
-print('* Accuracy on training set: %0.2f%%' % (100 * tr_acc))
-print('* Accuracy on test set: %0.2f%%' % (100 * te_acc))
+# print('* Accuracy on training set: %0.2f%%' % (100 * tr_acc))
+# print('* Accuracy on test set: %0.2f%%' % (100 * te_acc))
