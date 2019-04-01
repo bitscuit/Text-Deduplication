@@ -14,9 +14,9 @@ import numpy as np
 
 import random
 from keras.datasets import mnist
-from keras.models import Model
-from keras.layers import Input, Flatten, Dense, Dropout, Lambda, Embedding
-from keras.optimizers import RMSprop
+from keras.models import Model, Sequential
+from keras.layers import Input, Flatten, Dense, Dropout, Lambda, Embedding, SimpleRNN
+from keras.optimizers import RMSprop, Adam
 from keras import backend as K
 
 import matplotlib
@@ -72,6 +72,20 @@ def create_pairs(x, digit_indices):
 def create_base_network(input_shape):
     '''Base network to be shared (eq. to feature extraction).
     '''
+    # input = Input(shape=input_shape)
+
+    # x = Embedding(10700, 100, input_length=50)(input)
+    # # Flattens the output shape 
+    # # x = Flatten()(input)
+    # # Output arrays of size 128
+    # x = Dense(128, activation='relu')(x)
+    # # Sets a fraction of input units to 0 in order to stop overfitting
+    # x = Dropout(0.1)(x)
+    # x = Dense(128, activation='relu')(x)
+    # x = Dropout(0.1)(x)
+    # x = Dense(128, activation='relu')(x)
+
+
     input = Input(shape=input_shape)
     # Flattens the output shape 
     # x = Flatten()(input)
@@ -83,7 +97,11 @@ def create_base_network(input_shape):
     x = Dropout(0.1)(x)
     x = Dense(128, activation='relu')(x)
 
-    # x = Embedding(1000, 64, input_length=10)
+    # print(input_shape)
+    # model = Sequential()
+    # model.add(Embedding(32, 10))
+    # model.add(SimpleRNN(10, return_sequences=True))
+
     # model.add(Embedding(1000, 64, input_length=10))
 
     # the model will take as input an integer matrix of size (batch, input_length).
@@ -92,13 +110,15 @@ def create_base_network(input_shape):
     # now model.output_shape == (None, 10, 64), where None is the batch dimension.
 
     return Model(input, x)
+    # return model
 
 
 def compute_accuracy(y_true, y_pred):
     '''Compute classification accuracy with a fixed threshold on distances.
     '''
-    pred = y_pred.ravel() < 0.5
-    return np.mean(pred == y_true)
+
+    pred = np.ravel(y_pred) < 0.5
+    return np.mean(pred == y_true.astype(int))
 
 
 def accuracy(y_true, y_pred):
@@ -117,7 +137,7 @@ def accuracy(y_true, y_pred):
 # x_test /= 255
 
 data = tokenizeData('./data/questions.csv')
-x_train, x_test, y_train, y_test = split(data['question1'], data['question2'], data['label'], 0.7)
+x_train, x_test, y_train, y_test = split(data['question1'], data['question2'], data['label'], 0.85)
 
 input_shape = x_train['right'].shape[1:]
 
@@ -141,11 +161,11 @@ model = Model([input_a, input_b], distance)
 # train
 rms = RMSprop()
 model.compile(loss=contrastive_loss, optimizer=rms, metrics=[accuracy])
-ff = model.fit([x_train['left'], x_train['left']], y_train,
+ff = model.fit([x_train['left'], x_train['right']], y_train,
           batch_size=128,
           epochs=epochs,
-          validation_split=0.30)
-        #   validation_data=([x_test['left'], x_test['right']], y_test))
+          validation_split=0.10)
+        #   validation_data=([x_train['left'], x_train['right']], y_train))
 
 # Plot accuracy
 plt.subplot(211)
@@ -169,10 +189,10 @@ plt.tight_layout(h_pad=1.0)
 plt.savefig('./data/history-graph.png')
 
 # compute final accuracy on training and test sets
-# y_pred = model.predict([x_train['left'], x_train['left']])
+# y_pred = model.predict([x_train['left'], x_train['right']])
 # tr_acc = compute_accuracy(y_train, y_pred)
-# y_pred = model.predict([x_test['left'], x_test['right']])
-# te_acc = compute_accuracy(y_test, y_pred)
+y_pred = model.predict([x_test['left'], x_test['right']])
+te_acc = compute_accuracy(y_test, y_pred)
 
 # print('* Accuracy on training set: %0.2f%%' % (100 * tr_acc))
-# print('* Accuracy on test set: %0.2f%%' % (100 * te_acc))
+print('* Accuracy on test set: %0.2f%%' % (100 * te_acc))
