@@ -2,6 +2,7 @@
 import csv
 import numpy as np
 from keras.preprocessing.text import Tokenizer
+from keras.preprocessing.sequence import pad_sequences
 
 # Reads in the csv file and returns a list object
 def readInData(filename):
@@ -32,15 +33,18 @@ def tokenizeData(filename, saveToFile=False):
     t.fit_on_texts(inputB)
 
     # Integer encode documents
-    encodeA = t.texts_to_matrix(inputA, mode='count')
-    encodeB = t.texts_to_matrix(inputB, mode='count')
+    encodeA = t.texts_to_sequences(inputA)
+    encodeB = t.texts_to_sequences(inputB)
+
+    paddedA = pad_sequences(encodeA, maxlen=50)
+    paddedB = pad_sequences(encodeB, maxlen=50)
 
     if saveToFile:
         # Save matrix to file
         np.savetxt("../data/encodeA.csv", encodeA, delimiter=",")
         np.savetxt("../data/encodeB.csv", encodeB, delimiter=",")
 
-    return {"question1": encodeA, "question2": encodeB, "label":labels}
+    return {"question1": paddedA, "question2": paddedB, "label":labels}
 
 
 def split(left, right, labels, size):
