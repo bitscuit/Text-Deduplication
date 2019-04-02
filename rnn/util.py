@@ -20,9 +20,9 @@ def tokenizeData(filename, saveToFile=False):
     data = np.array(data, dtype=str)
 
     # Use only first 5000 rows
-    labels = data[0:2, 5]
-    inputA = data[0:2, 3]
-    inputB = data[0:2, 4]
+    labels = data[0:5000, 5]
+    inputA = data[0:5000, 3]
+    inputB = data[0:5000, 4]
 
     # create the tokenizer
     t = Tokenizer()
@@ -56,6 +56,3 @@ def split(left, right, labels, size):
 
     return x_train, x_test, y_train, y_test
 
-# data = tokenizeData('../data/questions.csv')
-# print(data)
-# x_train, x_test, y_train, y_test = split(data['question1'], data['question2'], data['label'], 0.7)
