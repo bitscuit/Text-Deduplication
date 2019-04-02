@@ -23,5 +23,15 @@ There are artificial neural network models used to solve this problem. All of th
 3. pass the two models to distance measure
 4. create new model with left and right inputs, and the distance as output
 
+# Requirements
+1. Install python3 from here https://www.python.org/downloads/
+2. Install pip following this tutorial for Windows 10 or Mac https://www.makeuseof.com/tag/install-pip-for-python/
+3. Install tensorflow using `pip install tensorflow`
+4. Install keras using `pip install keras`
+
 # Steps to run
-1. Install keras using `pip install keras`
+1. Run `python main.py`
+
+# Software Information
+- Ran on Windows 10 - i7 2.60 GHz processor
+- Ran on Mac ______________________
