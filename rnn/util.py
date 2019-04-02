@@ -1,4 +1,3 @@
-
 import csv
 import numpy as np
 from keras.preprocessing.text import Tokenizer
@@ -36,13 +35,14 @@ def tokenizeData(filename, saveToFile=False):
     encodeA = t.texts_to_sequences(inputA)
     encodeB = t.texts_to_sequences(inputB)
 
+    paddedA = pad_sequences(encodeA, maxlen=50)
+    paddedB = pad_sequences(encodeB, maxlen=50)
+
     if saveToFile:
         # Save matrix to file
         np.savetxt("../data/encodeA.csv", encodeA, delimiter=",")
         np.savetxt("../data/encodeB.csv", encodeB, delimiter=",")
 
-    paddedA = pad_sequences(encodeA, maxlen=50)
-    paddedB = pad_sequences(encodeB, maxlen=50)
     return {"question1": paddedA, "question2": paddedB, "label":labels}
 
 
