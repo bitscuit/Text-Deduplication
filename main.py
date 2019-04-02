@@ -65,7 +65,7 @@ def accuracy(y_true, y_pred):
     '''
     return K.mean(K.equal(y_true, K.cast(y_pred < 0.5, y_true.dtype)))
 
-def generatePlots(base_network, x_train, x_test, y_train, y_test, input_shape):
+def generatePlots(name, base_network, x_train, x_test, y_train, y_test, input_shape):
 
     input_a = Input(shape=input_shape)
     input_b = Input(shape=input_shape)
@@ -88,6 +88,8 @@ def generatePlots(base_network, x_train, x_test, y_train, y_test, input_shape):
             batch_size=128,
             epochs=epochs,
             validation_split=0.10)
+
+    model.save('./data/{0}.h5'.format(name))
 
     # Plot accuracy
     plt.subplot(211)
@@ -124,7 +126,7 @@ ffModel = ff(input_shape)
 rnnModel = rnn(input_shape)
 lstmModel = lstm(input_shape)
 
-generatePlots(ffModel, x_train, x_test, y_train, y_test, input_shape)
-generatePlots(rnnModel, x_train, x_test, y_train, y_test, input_shape)
-generatePlots(lstmModel, x_train, x_test, y_train, y_test, input_shape)
+generatePlots('ffModel', ffModel, x_train, x_test, y_train, y_test, input_shape)
+generatePlots('rnnModel', rnnModel, x_train, x_test, y_train, y_test, input_shape)
+generatePlots('lstmModel', lstmModel, x_train, x_test, y_train, y_test, input_shape)
 
