@@ -1,7 +1,7 @@
 import numpy as np
 
 from keras.models import Model, Sequential
-from keras.layers import Input, Lambda, Layer
+from keras.layers import Input, Layer
 from keras.optimizers import Adam
 from keras import backend as K
 
@@ -55,17 +55,18 @@ def generatePlots(name, base_network, x_train, x_test, y_train, y_test, input_sh
     malstm_distance = ManDist()([processed_a, processed_b])
     model = Model([input_a, input_b], malstm_distance)
 
-    # train
-    # rms = Adam()
+    # Train model
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
     ff = model.fit([x_train['left'], x_train['right']], y_train,
             batch_size=500,
             epochs=epochs,
             validation_split=0.10)
 
+    # Save model
     model.save('./data/{0}.h5'.format(name))
 
     # Plot accuracy
+    plt.subplot(2, 1, 1)
     plt.plot(ff.history['acc'])
     plt.plot(ff.history['val_acc'])
     plt.title('LSTM Model Accuracy')
@@ -74,6 +75,7 @@ def generatePlots(name, base_network, x_train, x_test, y_train, y_test, input_sh
     plt.legend(['Train', 'Validation'], loc='upper left')
 
     # Plot loss
+    plt.subplot(2, 1, 2)
     plt.plot(ff.history['loss'])
     plt.plot(ff.history['val_loss'])
     plt.title('Model Loss')
@@ -82,7 +84,8 @@ def generatePlots(name, base_network, x_train, x_test, y_train, y_test, input_sh
     plt.legend(['Train', 'Validation'], loc='upper right')
 
     plt.tight_layout(h_pad=1.0)
-    plt.savefig('./data/history-graph.png')
+    plt.savefig('./data/history-graph-{0}.png'.format(name))
+    plt.clf()
 
     scores = model.evaluate([x_test['left'], x_test['right']], y_test, verbose=0)
     print("%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))

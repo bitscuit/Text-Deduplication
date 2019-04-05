@@ -31,10 +31,11 @@ def tokenizeData(filename, saveToFile=False):
     t.fit_on_texts(inputA)
     t.fit_on_texts(inputB)
 
-    # Integer encode documents
+    # Integer encode words to sequences
     encodeA = t.texts_to_sequences(inputA)
     encodeB = t.texts_to_sequences(inputB)
 
+    # Pad the sequences to ensure consistent length
     paddedA = pad_sequences(encodeA, maxlen=50)
     paddedB = pad_sequences(encodeB, maxlen=50)
 
@@ -46,6 +47,7 @@ def tokenizeData(filename, saveToFile=False):
     return {"question1": paddedA, "question2": paddedB, "label":labels}
 
 
+# Split the inputs based on given size
 def split(left, right, labels, size):
     lengthOfTrain = round(size * len(left))
 

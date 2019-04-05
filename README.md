@@ -30,6 +30,7 @@ There are artificial neural network models used to solve this problem. All of th
 
 # Steps to run
 1. Run `python main.py`
+2. Results are stored in the data folder
 
 # Software Information
 - Ran on Windows 10 - i7 2.60 GHz processor
