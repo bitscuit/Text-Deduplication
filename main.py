@@ -56,10 +56,10 @@ def generatePlots(name, base_network, x_train, x_test, y_train, y_test, input_sh
     model = Model([input_a, input_b], malstm_distance)
 
     # train
-    rms = Adam()
-    model.compile(loss='mean_squared_error', optimizer=rms, metrics=['accuracy'])
+    # rms = Adam()
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
     ff = model.fit([x_train['left'], x_train['right']], y_train,
-            batch_size=256,
+            batch_size=500,
             epochs=epochs,
             validation_split=0.10)
 
